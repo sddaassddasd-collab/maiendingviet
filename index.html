@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ending Crossfade</title>
+  <style>
+    html, body { height: 100%; margin: 0; background:#fff; }
+    .stage {
+      position: fixed; inset: 0;
+      display: grid; place-items: center;
+      overflow: hidden; background:#000;
+    }
+    .stage img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+      user-select: none;
+    }
+    .shoot {
+      position: fixed; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      font-size: clamp(32px, 6vw, 64px);
+      line-height: 1;
+      padding: .55em .7em;
+      border-radius: 999px;
+      background: #ffffffcc;
+      backdrop-filter: blur(8px);
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: transform .12s ease;
+    }
+    .shoot:active { transform: translate(-50%, -50%) scale(.96); }
+    .shoot[disabled] { opacity:.6; cursor: default; }
+
+    .veil {
+      position: fixed; inset: 0;
+      background:#fff; opacity: 0;
+      pointer-events: none;
+      transition: opacity 0s linear; /* 初始無動畫，點擊時瞬間全白 */
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <img id="photo" src="ending1.png" alt="ending image" />
+  </div>
+
+  <button id="shoot" class="shoot" aria-label="Reveal next photo">📷</button>
+
+  <div id="veil" class="veil" aria-hidden="true"></div>
+
+  <!-- 結尾音效 -->
+  <audio id="endingSfx" src="ending.mp3" preload="auto" playsinline></audio>
+
+  <script>
+    (function () {
+      // 可調整參數：等待 4 秒後開始淡出、淡出 1 秒
+      const HOLD_MS = 4000;   // 全白停留時間
+      const FADE_MS = 4000;   // 淡出時間
+
+      const img  = document.getElementById('photo');
+      const btn  = document.getElementById('shoot');
+      const veil = document.getElementById('veil');
+      const sfx  = document.getElementById('endingSfx');
+
+      // 預載下一張圖
+      const nextImage = new Image();
+      nextImage.src = 'ending2.jpg';
+
+      btn.addEventListener('click', async () => {
+        if (btn.disabled) return;
+        btn.disabled = true;
+
+        // 播放音效（以使用者手勢觸發）
+        try {
+          sfx.currentTime = 0;
+          await sfx.play();
+        } catch (err) {
+          console.warn('Audio play was blocked:', err);
+        }
+
+        // 隱藏按鈕
+        btn.style.display = 'none';
+
+        // 立刻閃白（瞬間全白）
+        veil.style.transition = 'opacity 0s linear';
+        veil.style.opacity = '1';
+
+        // 確保下一張圖載入完成
+        if (!nextImage.complete) {
+          try {
+            await new Promise((resolve, reject) => {
+              nextImage.onload = resolve;
+              nextImage.onerror = reject;
+            });
+          } catch {
+            veil.style.opacity = '0';
+            alert('無法載入 ending2.jpg');
+            return;
+          }
+        }
+
+        // 在全白時切換到底圖（使用者看不到切換瞬間）
+        img.src = nextImage.src;
+
+        // 等待 HOLD_MS 毫秒後才開始淡出白幕
+        setTimeout(() => {
+          veil.style.transition = `opacity ${FADE_MS}ms ease`;
+          veil.style.opacity = '0';
+        }, HOLD_MS);
+      });
+    })();
+  </script>
+</body>
+</html>
