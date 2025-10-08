@@ -127,17 +127,13 @@
 
       // === 左上角 x End 跳轉 ===
       exit.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetURL = "https://sddaassddasd-collab.github.io/theinvinciblecityending/";
-
-        try {
-          window.top.location.replace(targetURL);
-        } catch (err) {
-          console.warn("Top navigation blocked:", err);
-          alert("無法開啟新頁面，請允許導向或直接點擊以下連結：\n" + targetURL);
-          window.open(targetURL, '_blank');
-        }
-      });
+  e.preventDefault();
+  const w = window.open(
+    'https://sddaassddasd-collab.github.io/theinvinciblecityending/',
+    'finale',
+    'popup,width=900,height=700'
+  );
+});
     })();
   </script>
 </body>
