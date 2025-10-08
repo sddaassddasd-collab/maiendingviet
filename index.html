@@ -39,7 +39,25 @@
       position: fixed; inset: 0;
       background:#fff; opacity: 0;
       pointer-events: none;
-      transition: opacity 0s linear; /* 初始無動畫，點擊時瞬間全白 */
+      transition: opacity 0s linear;
+    }
+
+    /* 左上角的 x End 按鈕 */
+    .exit {
+      position: fixed; top: 16px; left: 16px;
+      z-index: 20;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      background: #00000080;
+      border: 1px solid #e2e8f099;
+      border-radius: 8px;
+      padding: .4em .8em;
+      cursor: pointer;
+      transition: background .2s ease;
+    }
+    .exit:hover {
+      background: #ffffff20;
     }
   </style>
 </head>
@@ -50,14 +68,14 @@
 
   <button id="shoot" class="shoot" aria-label="Reveal next photo">📷</button>
 
+  <button id="exit" class="exit" aria-label="Exit">x End</button>
+
   <div id="veil" class="veil" aria-hidden="true"></div>
 
-  <!-- 結尾音效 -->
   <audio id="endingSfx" src="ending.mp3" preload="auto" playsinline></audio>
 
   <script>
     (function () {
-      // 可調整參數：等待 4 秒後開始淡出、淡出 1 秒
       const HOLD_MS = 4000;   // 全白停留時間
       const FADE_MS = 4000;   // 淡出時間
 
@@ -65,8 +83,8 @@
       const btn  = document.getElementById('shoot');
       const veil = document.getElementById('veil');
       const sfx  = document.getElementById('endingSfx');
+      const exit = document.getElementById('exit');
 
-      // 預載下一張圖
       const nextImage = new Image();
       nextImage.src = 'ending2.jpg';
 
@@ -74,7 +92,6 @@
         if (btn.disabled) return;
         btn.disabled = true;
 
-        // 播放音效（以使用者手勢觸發）
         try {
           sfx.currentTime = 0;
           await sfx.play();
@@ -82,14 +99,11 @@
           console.warn('Audio play was blocked:', err);
         }
 
-        // 隱藏按鈕
         btn.style.display = 'none';
 
-        // 立刻閃白（瞬間全白）
         veil.style.transition = 'opacity 0s linear';
         veil.style.opacity = '1';
 
-        // 確保下一張圖載入完成
         if (!nextImage.complete) {
           try {
             await new Promise((resolve, reject) => {
@@ -103,14 +117,26 @@
           }
         }
 
-        // 在全白時切換到底圖（使用者看不到切換瞬間）
         img.src = nextImage.src;
 
-        // 等待 HOLD_MS 毫秒後才開始淡出白幕
         setTimeout(() => {
           veil.style.transition = `opacity ${FADE_MS}ms ease`;
           veil.style.opacity = '0';
         }, HOLD_MS);
+      });
+
+      // === 左上角 x End 跳轉 ===
+      exit.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetURL = "https://sddaassddasd-collab.github.io/theinvinciblecityending/";
+
+        try {
+          window.top.location.replace(targetURL);
+        } catch (err) {
+          console.warn("Top navigation blocked:", err);
+          alert("無法開啟新頁面，請允許導向或直接點擊以下連結：\n" + targetURL);
+          window.open(targetURL, '_blank');
+        }
       });
     })();
   </script>
